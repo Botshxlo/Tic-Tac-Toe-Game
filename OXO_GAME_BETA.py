@@ -3,6 +3,7 @@
 # 17/05/2020
 
 import sys
+import os 
 from PyQt5.QtWidgets import *  # imports pyqt modules
 from PyQt5.QtCore import *  # imports pyqt modules
 from PyQt5.QtGui import *  # imports pyqt modules
@@ -38,8 +39,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.xIcon = QIcon("cross.gif")
         self.bIcon = QIcon("blank.gif")
         
-        # set the shape of each player and object name for each name
-        self.dic_number = {"number":0}
 
         # set window icon and color
         icon = QIcon()
@@ -208,11 +207,106 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         for self.button in self.allButtons:
             self.button.clicked.connect(self.button_add_icon)
             
+        # Disable the game board until the user has connect to the server
+        self.board_game_widget.setEnabled(False)
+            
+            
         # set up loop thread    
         self.loop_thread = LoopThread()  # create thread
         self.loop_thread.msg_signal.connect(self.loop_thread_slot)  # connect signal to slot
         self.connect_btn.clicked.connect(self.connect_server)  
+        
+    def feature(self, condition=None, character=None):
+        #
+        self.dialog_window = QDialog()  # Create dialog window
+        self.dialog_window.setModal(True) 
+        self.dialog_window.setGeometry(200,200,200, 200)  # setting window geometries
+        self.dialog_window.setWindowTitle("Sales")  # Set window title 
+        self.dialog_window.setPalette(QPalette(QColor("CYAN")))
+        
+        # vbox for the pixmap winner and play again label
+        self.v_box = QVBoxLayout()
+        
+        # hbox for the buttons
+        self.h_box = QHBoxLayout()
+        
+        # main vbox for the overall layout
+        self.main_vbox = QVBoxLayout()
 
+        # create pixmap label
+        self.pixmap_label = QLabel("")
+        
+        # create widgets
+        self.win_label = QLabel("")
+        self.win_label.setFont(QFont("Arial",18,5))
+        self.win_label.setAlignment(Qt.AlignCenter)
+        
+        self.play_label = QLabel("Play again?") 
+        self.play_label.setFont(QFont("Arial",12,5))
+        self.play_label.setAlignment(Qt.AlignCenter)
+        
+        # create buttons
+        self.yes_button = QPushButton("Yes")
+        self.yes_button.setObjectName("y")
+        self.no_button = QPushButton("No")
+        self.no_button.setObjectName("n")
+        
+        # connect signals to slots
+        for button in [self.yes_button, self.no_button]:
+            button.clicked.connect(self.response)
+            button.clicked.connect(self.hide)
+        
+        # set the mixmap labels
+        self.win_pixmap = QPixmap(os.path.join("Icons", "winIcon.png"))
+        self.lose_pixmap = QPixmap(os.path.join("Icons", "loseIcon.png"))
+        self.draw_pixmap = QPixmap(os.path.join("Icons", "drawIcon.png"))
+        
+        # check for conditions
+        if condition == "You Win!":
+            self.pixmap_label.setPixmap(self.win_pixmap)
+            self.win_label.setText("WINNER - " + character + "!")
+            
+            self.v_box.addWidget(self.pixmap_label, alignment=Qt.AlignCenter)
+            self.v_box.addWidget(self.win_label)
+            """ set vbox QWidget """
+            self.vbox_widget = QWidget()
+            self.vbox_widget.setLayout(self.v_box)
+            
+            self.h_box.addWidget(self.yes_button)
+            self.h_box.addWidget(self.no_button)
+            """ set hbox Widget """
+            self.h_box_widget = QWidget()
+            self.h_box_widget.setLayout(self.h_box)
+            
+            # set all widgets
+            self.main_vbox.addWidget(self.vbox_widget)
+            self.main_vbox.addWidget(self.play_label)
+            self.main_vbox.addWidget(self.h_box_widget)
+
+        elif condition == "Its a Draw!":
+            self.pixmap_label.setPixmap(self.draw_pixmap)
+            self.win_label.setText("Its a Draw")
+            
+            self.v_box.addWidget(self.pixmap_label, alignment=Qt.AlignCenter)
+            self.v_box.addWidget(self.win_label)
+            """ set vbox QWidget """
+            self.vbox_widget = QWidget()
+            self.vbox_widget.setLayout(self.v_box)
+            
+            self.h_box.addWidget(self.yes_button)
+            self.h_box.addWidget(self.no_button)
+            """ set hbox Widget """
+            self.h_box_widget = QWidget()
+            self.h_box_widget.setLayout(self.h_box)
+            
+            # set all widgets
+            self.main_vbox.addWidget(self.vbox_widget)
+            self.main_vbox.addWidget(self.play_label)
+            self.main_vbox.addWidget(self.h_box_widget)
+            
+        self.dialog_window.setLayout(self.main_vbox)
+        self.dialog_window.show()
+        
     def loop_thread_slot(self, txt):
         
         # check for messages from the server (new game,X or new game,O)
@@ -263,26 +357,35 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             
             # check who won the game
             if self.shape == txt[-1] and self.shape == "X":
-                self.server_messages.append("You win!")
+                self.condition = "You Win!"
+                self.server_messages.append(self.condition)
                 
                 # update new score
                 self.old_score = self.score_x.text()
                 self.new_score = int(self.old_score) + 1 
                 self.score_x.setText(str(self.new_score))
                 
+                self.feature(condition=self.condition, character="x")
+                
             elif self.shape == txt[-1] and self.shape == "O":
-                self.server_messages.append("You win!")
+                self.condition = "You Win!"
+                self.server_messages.append(self.condition)
                 
                 # update new score
                 self.old_score = self.score_o.text()
                 self.new_score = int(self.old_score) + 1 
                 self.score_o.setText(str(self.new_score))
                 
+                self.feature(condition=self.condition, character="O")
+                
             else:    
                 self.server_messages.append("You lose!")    
             
         elif txt == "game over,T":
-            self.server_messages.append("game over\nits a Draw!")  
+            self.condition = "Its a Draw!"
+            self.server_messages.append("game over\nits a Draw!") 
+            
+            self.response(self.condition, "T") 
                 
                 
     # Method to connect to the server
@@ -306,9 +409,16 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.sended = self.sender()
         self.button_number = self.sended.objectName() # get the object name
         game.send_message(str(self.button_number))  # send the message to the server
+            
+    def response(self):
         
+        self.res = self.sender()
+        self.res_answer = self.res.objectName()
+        game.send_message(self.res_answer)
+            
     def exit(self):  # exit button function
         sys.exit()
+        
 
 app = QApplication(sys.argv)  # creates necessary app object
 game = OXO_GAME()  # Instance of OXO_GUI class

@@ -9,6 +9,15 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from style import styler
 
+
+def pop_window(self):
+        self.dialog_window = QDialog()  # Create dialog window
+        self.dialog_window.setGeometry(200, 200, 200, 200)  # setting window geometries
+        self.dialog_window.setWindowTitle("Sales")  # Set window title 
+        self.dialog_window.setPalette(QPalette(QColor("CYAN")))
+        
+        
+        
 class Dialog(QDialog):
     
     def __init__(self, parent=None, state=None):
@@ -26,7 +35,9 @@ class Dialog(QDialog):
         win_label.setFont(QFont("Arial",18,5))
         win_label.setAlignment(Qt.AlignCenter)
         
-        play_label = QLabel("Play again?")
+        
+        play_label = QLabel("Play again?") 
+        play_label.setFont(QFont("Arial",18,5))
         play_label.setAlignment(Qt.AlignCenter)
         
         #
@@ -90,7 +101,7 @@ class Dialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication([])
-    dialog = Dialog(state="You win!")
+    dialog = pop_window()
     dialog.show()
     app.exec_()
 
