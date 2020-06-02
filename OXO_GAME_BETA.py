@@ -41,8 +41,8 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.xIcon = QIcon(os.path.join("Icons", "cross.gif"))
         self.bIcon = QIcon(os.path.join("Icons", "blank.gif"))
         
-        # dic to keep track of the scores
-        self.dic = {"X":0,"O":0}
+        # answer of the user
+        self.response_user = None
         
         # set the sounds 
         """ part of the enhancement """
@@ -92,7 +92,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         """ Horizontal QWidget  """
         self.horizontal_widget = QWidget()
         self.horizontal_widget.setLayout(self.horizontal)
-
 
         # set up widget for Text message
         self.server_messages = QTextEdit()
@@ -174,8 +173,8 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.exit_button.setFont(QFont("Monospace",13,5))
 
         self.grid_buttons = QGridLayout()
-        self.grid_buttons.addWidget(self.feedback,0,3)
-        self.grid_buttons.addWidget(self.exit_button,0,4)
+        self.grid_buttons.addWidget(self.feedback,0,3, alignment=Qt.AlignCenter)
+        self.grid_buttons.addWidget(self.exit_button,0,4, alignment=Qt.AlignCenter)
         """ grid_buttons QWidget """
         self.grid_buttons_widget = QWidget()
         self.grid_buttons_widget.setLayout(self.grid_buttons)
@@ -215,7 +214,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         
         # connect signals to slots
         for self.button in self.allButtons:
-            self.button.clicked.connect(self.button_add_icon)
+            self.button.clicked.connect(self.button_clicked)
             
         # Disable the game board until the user has connect to the server
         self.board_game_widget.setEnabled(False)
@@ -225,10 +224,9 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.loop_thread.msg_signal.connect(self.loop_thread_slot)  # connect signal to slot
         self.connect_btn.clicked.connect(self.connect_server) 
     
-    # set the dialog
+    # Dialog window method
     """ part of the enhancements """
     def feature_dialog(self, condition=None, character=None):
-        #
         self.dialog_window = QDialog()  # Create dialog window
         self.dialog_window.setModal(True) 
         self.dialog_window.setGeometry(200,200,200, 200)  # setting window geometries
@@ -265,7 +263,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         # connect signals to slots
         for button in [self.yes_button, self.no_button]:
             button.clicked.connect(self.response)
-            #button.clicked.connect(self.hide)
         
         # set the mixmap labels
         self.win_pixmap = QPixmap(os.path.join("Icons", "winIcon.png"))
@@ -305,25 +302,26 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.dialog_window.setLayout(self.main_vbox)
         self.dialog_window.show()
     """ @enhancements """    
-        
+    
+    # loop thread method    
     def loop_thread_slot(self, txt):
         
         # check for messages from the server (new game,X or new game,O)
         if txt == "new game,X" or txt == "new game,O":
             
             # declare a new game
-            self.new_game()
+            self.reset_board()
             
             self.shape = txt[-1]  # player character
-            self.server_messages.append("new game")  # add text to server messages box
+            self.server_messages.append(" \nnew game")  # append message to text edit
             
             # check for character
             if self.shape == "X":
-                self.my_shape.setIcon(self.xIcon)
+                self.my_shape.setIcon(self.xIcon)   # set Icon
             elif self.shape == "O":
-                self.my_shape.setIcon(self.oIcon)    
+                self.my_shape.setIcon(self.oIcon)   # set Icon
                 
-            self.sounds["welcome"].play()
+            self.sounds["welcome"].play()  # play sound
                 
         # chech for messages from the server (your or opponents move)
         if txt == "your move":
@@ -333,7 +331,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             self.board_game_widget.setEnabled(True)
             
         elif txt =="opponents move":
-            self.server_messages.append("opponents move")         
+            self.server_messages.append("opponents move")  # append message to text edit
             
             # Disable the game board         
             self.board_game_widget.setEnabled(False)
@@ -342,29 +340,28 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         if txt[:10] == "valid move":
             self.shape_move = txt[11]  # character X or O                              
             self.number = txt[-1]  # object (button) number
+            
             self.clicked_button = self.board_game_widget.findChild(QToolButton, str(self.number))  # locate the button that is clicked
             
             # check for character,set Icon and play sound
             if self.shape_move == "X":
-                #self.sound = self.feature_sounds()
-                self.sounds["cross"].play()
+                self.sounds["cross"].play()  # play sound
                 
-                self.clicked_button.setIcon(self.xIcon)
+                self.clicked_button.setIcon(self.xIcon)  # set Icon
                 
             elif self.shape_move == "O":
-                #self.sound = self.feature_sounds()
-                self.sounds["nought"].play()
+                self.sounds["nought"].play()  # play sound
                 
-                self.clicked_button.setIcon(self.oIcon)
+                self.clicked_button.setIcon(self.oIcon)  # set Icon
             
         elif txt[:12] == "invalid move":
-            self.server_messages.append("invalid move")
+            self.server_messages.append("invalid move")  # append message to text edit
         
         # check for messages from the server (game over,O or game over,X and game over,T)    
         if txt == "game over,O" or txt == "game over,X":
-            self.server_messages.append("game over")
+            self.server_messages.append("game over")  # append message to text edit
             
-            # check who won the game
+            # check who won the game and display appropriate information (Dialog window)
             if self.shape == txt[-1] and self.shape == "X":
                 self.condition = "You Win!"
                 
@@ -378,7 +375,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
                 self.condition = "You Win!"
                 
                 self.sounds["win"].play()
-                self.feature_dialog(condition=self.condition, character="O")
+                self.feature_dialog(condition=self.condition, character="O")  # display dialog window
                 
                 self.server_messages.append(self.condition) # append message to text edit
 
@@ -387,25 +384,38 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
                 
                 self.server_messages.append(self.condition) # append message to text edit
                 
-                self.feature_dialog(condition=self.condition, character="")  # show dialog window
+                self.feature_dialog(condition=self.condition, character="")  # display dialog window
             
             # Update new score
             if txt == "game over,X":
-                self.old_score = self.score_x.text()
+                self.old_score = self.score_x.text()  # get the current score
                 self.new_score = int(self.old_score) + 1 
-                self.score_x.setText(str(self.new_score))
+                self.score_x.setText(str(self.new_score))  # set new score
                 
             elif txt == "game over,O":    
-                self.old_score = self.score_o.text()
+                self.old_score = self.score_o.text()  # get the current score
                 self.new_score = int(self.old_score) + 1 
-                self.score_o.setText(str(self.new_score))                
+                self.score_o.setText(str(self.new_score))  # set new score   
 
         elif txt == "game over,T":
             self.condition = "Its a Draw!"
             self.server_messages.append("game over\nits a Draw!") # append message to text edit
             
-            self.feature_dialog(self.condition, "T") 
+            self.feature_dialog(condition=self.condition, character="T") # display dialog window
+        
+        # check for messages from the server (game over)    
+        if txt == "exit game":
+            
+            # check who ended the game
+            if self.response_user == "n":
+                self.server_messages.append("You left the game!") # append message to text edit
+            else:
+                self.server_messages.append("Opponent left the game!") # append message to text edit
                 
+            self.exit_game() # decalre new game
+                
+    
+    # reset board method
     def reset_board(self):
         # Enable game board and clear each button
         self.board_game_widget.setEnabled(True)
@@ -415,10 +425,18 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             button.setIcon(self.bIcon)
             button.setEnabled(True)
             
-    def new_game(self):
-        self.reset_board()        
+    # new game method
+    def exit_game(self):
+        self.reset_board() # reset the board
+        
+        self.feedback.setText("Disconnected")  # give user feedback
+        
+        self.server_messages.append("Click exit to exit the game")  # append message to text edit
+        
+        self.board_game_widget.setEnabled(False) # disable the board game
+        
                     
-    # Method to connect to the server
+    # connect to the server method
     def connect_server(self):
         self.localhost = self.server_lineEdit.displayText().lower()  # get text from the Line Edit
         
@@ -432,37 +450,34 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             self.connect_btn.setEnabled(False)  # Disable the connect button for one user connection
             self.server_lineEdit.setEnabled(False)  # Disable the line edit for one user connection
         else:
-            self.feedback.setText("Enter a valid server url!")    
+            self.server_messages.append("->Error connecting to server!")    
             
-    def button_add_icon(self):  # buttons function
+        self.server_lineEdit.clear()  # clear the line edit
+            
+    # button clicked method        
+    def button_clicked(self):
         
         self.sended = self.sender()
         self.button_number = self.sended.objectName() # get the object name
-        game.send_message(str(self.button_number))  # send the message to the server
-            
+        game.send_message(str(self.button_number))  # send message to the server
+    
+    # response method        
     def response(self):
         
         self.res = self.sender() # retreives the clicked button
         self.res_answer = self.res.objectName() 
-            
-        game.send_message(self.res_answer) # send messages to the server
         
         if self.res_answer == "n":
-            # chick which player ended the game
-            if self.res_answer == "n":
-                self.server_message.append("You left the game!")
+            self.response_user = "n"
+        else:
+            self.response_user = "y"
                 
-                # reset the game board and score 
-                self.new_game()
-                self.score_x.setText("0")    
-                self.score_o.setText("0")  
-            else:    
-                self.server_message.append("opponent left the game!")  
+        game.send_message(self.res_answer) # send messages to the server
             
         self.dialog_window.close()
             
-            
-    def exit(self):  # exit button function
+    # exit method        
+    def exit(self): 
         sys.exit()
         
 
