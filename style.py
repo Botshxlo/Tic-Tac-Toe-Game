@@ -85,3 +85,172 @@ def styler():
     )
 
     return css
+
+""" part of the enhancements """
+def change_theme0():
+    
+    css = qstylizer.style.StyleSheet()
+
+ # style the Text Edit
+    css.QTextEdit.setValues(
+        borderRadius="7px",
+        marginLeft = "2px",
+        border="2px solid black"
+    )
+
+    # style the Q labels
+    css.QLabel.setValues(
+        color = "black",
+        marginLeft="6px"
+    )
+
+    # style the QWidget
+    css.QWidget.setValues(
+        backgroundColor="#d9b38c",  # brownish
+        borderRadius="10px"
+    )
+
+    # style the connect button
+    css.QPushButton.setValues(
+        border="2px solid black",
+        paddingLeft="2px",
+        paddingRight="2px"
+    )
+
+    # style the Line Edit
+    css.QLineEdit.setValues(
+        border="2px solid black",
+        paddingLeft="2px",
+        paddingRight="2px"
+    )
+
+    # Style the tool button
+    css.QToolButton.setValues(
+        border="2px solid black",
+        marginLeft = "2px",
+        marginRight = "2px",
+        marginBottom = "2px",
+        borderRadius="7px",
+    )
+
+    # change the push button style when pressed
+    css.QPushButton.pressed.setValues(
+        border="3px solid black",
+        padding="5px",
+        paddingLeft="-1px",
+        marginRight="-1px",
+        marginBottom="0px"
+    )
+
+    # change the tool button style when pressed
+    css.QToolButton.pressed.setValues(
+        border="3px solid black",
+        padding="1px",
+        marginLeft="5px",
+        marginRight="5px",
+        marginTop="5px",
+        marginBottom="5px"
+    )
+
+    # change the tool button style when hovered
+    css.QToolButton.hover.setValues(
+        border="3px solid white"
+    )
+
+    # change the push button style when hovered
+    css.QPushButton.hover.setValues(
+        border="2px solid white"
+    )
+
+    # change the server line edit when its hovered
+    css.QLineEdit.hover.setValues(
+        border="2px solid white"
+    )
+
+    return css
+
+""" part of the enhancements """
+def change_theme1():
+    
+    css = qstylizer.style.StyleSheet()
+
+ # style the Text Edit
+    css.QTextEdit.setValues(
+        borderRadius="7px",
+        marginLeft = "2px",
+        border="2px solid black"
+    )
+
+    # style the Q labels
+    css.QLabel.setValues(
+        color = "black",
+        marginLeft="6px"
+    )
+
+    # style the QWidget
+    css.QWidget.setValues(
+        backgroundColor="#ff6666", # red
+        borderRadius="10px"
+    )
+
+    # style the connect button
+    css.QPushButton.setValues(
+        border="2px solid black",
+        paddingLeft="2px",
+        paddingRight="2px"
+    )
+
+    # style the Line Edit
+    css.QLineEdit.setValues(
+        border="2px solid black",
+        paddingLeft="2px",
+        paddingRight="2px"
+    )
+
+    # Style the tool button
+    css.QToolButton.setValues(
+        border="2px solid black",
+        marginLeft = "2px",
+        marginRight = "2px",
+        marginBottom = "2px",
+        borderRadius="7px",
+    )
+
+    # change the push button style when pressed
+    css.QPushButton.pressed.setValues(
+        border="3px solid black",
+        padding="5px",
+        paddingLeft="-1px",
+        marginRight="-1px",
+        marginBottom="0px"
+    )
+
+    # change the tool button style when pressed
+    css.QToolButton.pressed.setValues(
+        border="3px solid black",
+        padding="1px",
+        marginLeft="5px",
+        marginRight="5px",
+        marginTop="5px",
+        marginBottom="5px"
+    )
+
+    # change the tool button style when hovered
+    css.QToolButton.hover.setValues(
+        border="3px solid white"
+    )
+
+    # change the push button style when hovered
+    css.QPushButton.hover.setValues(
+        border="2px solid white"
+    )
+
+    # change the server line edit when its hovered
+    css.QLineEdit.hover.setValues(
+        border="2px solid white"
+    )
+
+    return css
+
+    
+    

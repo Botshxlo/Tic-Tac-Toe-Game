@@ -37,32 +37,23 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.setPalette(QPalette(QColor("#498f7f")))
 
         # set the X,O and blank Icon
-        self.oIcon = QIcon(os.path.join("Icons", "nought.png"))
-        self.xIcon = QIcon(os.path.join("Icons", "cross.png"))
+        self.oIcon = QIcon(os.path.join("Icons", "nought.gif"))
+        self.xIcon = QIcon(os.path.join("Icons", "cross.gif"))
         self.bIcon = QIcon(os.path.join("Icons", "blank.gif"))
         
         # answer of the user
         self.response_user = None
         
+        # set the sounds 
+        """ part of the enhancement """
+        self.sounds = feature_sound()
+        """ @enhancements """
+        
         # set window icon and color
         icon = QIcon()
         icon.addPixmap(QPixmap(os.path.join("Icons", "game_icon.png")))
         self.setWindowIcon(icon)  # set window icon
-        
-        # set the sounds 
-        """ part of the enhancements """
-        self.sounds = feature_sound()
-        """ @enhancements """
-        
-        # Create toggle button for change of theme
-        """ part of the enhancements """
-        self.toggle_button =  QPushButton("change theme")
-        self.toggle_button.setFixedSize(120,30)
-        self.toggle_button.setCheckable(True)
-        self.toggle_button.setFont(QFont("Monospace",13,5))
-        self.toggle_button.clicked.connect(self.change_theme)
-        """ @enhancements """
-        
+            
         # create header
         self.header = QLabel("TenElevenGames OXO")
         self.header.setFont(QFont("Arial",22,5))
@@ -121,26 +112,26 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.my_shape_label.setFont(QFont("Arial",15,5))
         self.score_label = QLabel("Score:")
         self.score_label.setFont(QFont("Arial",15,5))
-        self.you = QLabel("You          ==>")
-        self.you.setAlignment(Qt.AlignLeft)
-        self.you.setFont(QFont("Arial",15,5))
-        self.score_you = QLabel("0")
-        self.score_you.setFont(QFont("Arial",15,5))
-        self.opponent = QLabel("Opponent ==>")
-        self.opponent.setAlignment(Qt.AlignLeft)
-        self.opponent.setFont(QFont("Arial",15,5))
-        self.score_opponent = QLabel("0")
-        self.score_opponent.setFont(QFont("Arial",15,5))
+        self.character_x = QLabel("Player X==>")
+        self.character_x.setAlignment(Qt.AlignCenter)
+        self.character_x.setFont(QFont("Arial",15,5))
+        self.score_x = QLabel("0")
+        self.score_x.setFont(QFont("Arial",15,5))
+        self.character_o = QLabel("Player O==>")
+        self.character_o.setAlignment(Qt.AlignCenter)
+        self.character_o.setFont(QFont("Arial",15,5))
+        self.score_o = QLabel("0")
+        self.score_o.setFont(QFont("Arial",15,5))
 
         # create score board and players character layout
         self.player_grid = QGridLayout()
         self.player_grid.addWidget(self.my_shape_label,0,0)
         self.player_grid.addWidget(self.my_shape,0,1)
         self.player_grid.addWidget(self.score_label,1,0)
-        self.player_grid.addWidget(self.you,2,0)
-        self.player_grid.addWidget(self.score_you,2,1)
-        self.player_grid.addWidget(self.opponent,3,0)
-        self.player_grid.addWidget(self.score_opponent,3,1)
+        self.player_grid.addWidget(self.character_o,2,0)
+        self.player_grid.addWidget(self.score_o,2,1)
+        self.player_grid.addWidget(self.character_x,3,0)
+        self.player_grid.addWidget(self.score_x,3,1)
         """ player_grid widget """
         self.player_grid_widget = QWidget()
         self.player_grid_widget.setLayout(self.player_grid)
@@ -182,7 +173,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.exit_button.setFont(QFont("Monospace",13,5))
 
         self.grid_buttons = QGridLayout()
-        self.grid_buttons.addWidget(self.toggle_button,0,2, alignment=Qt.AlignCenter)
+        self.grid_buttons.addWidget(self.feedback,0,3, alignment=Qt.AlignCenter)
         self.grid_buttons.addWidget(self.exit_button,0,4, alignment=Qt.AlignCenter)
         """ grid_buttons QWidget """
         self.grid_buttons_widget = QWidget()
@@ -212,11 +203,65 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.setLayout(self.ui)
 
         # set the StyleSheet for the main layout
-        self.theme_counter = 0
-        self.main_css = styler()
-        self.changed_css0 = change_theme0()
-        self.changed_css1 = change_theme1()
-        self.main_layout_widget.setStyleSheet(self.main_css.toString())
+        css = styler()
+        self.main_layout_widget.setStyleSheet(css.toString())
+        #************************************************************************
+         # vbox for the pixmap winner and play again label
+        self.v_box = QVBoxLayout()
+        
+        # hbox for the buttons
+        self.h_box = QHBoxLayout()
+        
+        # main vbox for the overall layout
+        self.main_vbox = QVBoxLayout()
+
+        # create pixmap label
+        self.pixmap_label = QLabel("")
+        
+        # create widgets
+        self.win_label = QLabel("")
+        self.win_label.setFont(QFont("Arial",18,5))
+        self.win_label.setAlignment(Qt.AlignCenter)
+        
+        self.play_label = QLabel("Play again?") 
+        self.play_label.setFont(QFont("Arial",12,5))
+        self.play_label.setAlignment(Qt.AlignCenter)
+        
+        # create buttons
+        self.yes_button = QPushButton("Yes")
+        self.yes_button.setObjectName("y")
+        self.no_button = QPushButton("No")
+        self.no_button.setObjectName("n")
+        
+        # connect signals to slots
+        for button in [self.yes_button, self.no_button]:
+            button.clicked.connect(self.response)
+        
+        # set the mixmap labels
+        self.win_pixmap = QPixmap(os.path.join("Icons", "winIcon.png"))
+        self.lose_pixmap = QPixmap(os.path.join("Icons", "loseIcon.png"))
+        self.draw_pixmap = QPixmap(os.path.join("Icons", "drawIcon.png"))
+        
+        self.v_box.addWidget(self.pixmap_label, alignment=Qt.AlignCenter)
+        self.v_box.addWidget(self.win_label)
+        """ set vbox QWidget """
+        self.vbox_widget = QWidget()
+        self.vbox_widget.setLayout(self.v_box)
+            
+        self.h_box.addWidget(self.yes_button)
+        self.h_box.addWidget(self.no_button)
+        """ set hbox Widget """
+        self.h_box_widget = QWidget()
+        self.h_box_widget.setLayout(self.h_box)
+            
+        # set all widgets
+        self.main_vbox.addWidget(self.vbox_widget)
+        self.main_vbox.addWidget(self.play_label)
+        self.main_vbox.addWidget(self.h_box_widget)
+        
+        self.main_vbox_widget = QWidget()
+        self.main_vbox_widget.setLayout(self.main_vbox)
+        #******************************************************************
 
         # connect buttons
         self.exit_button.clicked.connect(self.exit)
@@ -236,35 +281,12 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.loop_thread.msg_signal.connect(self.loop_thread_slot)  # connect signal to slot
         self.connect_btn.clicked.connect(self.connect_server) 
     
-    """ part of enhancements """
-    def change_theme(self):
-        
-        # if button is checked
-        if self.toggle_button.isChecked():
-            # change theme of the game and background color of the button
-            
-            if self.theme_counter%2 == 0:
-                self.setPalette(QPalette(QColor("#996633")))  # brownish
-                self.main_layout_widget.setStyleSheet(self.changed_css0.toString())  # brownish
-                
-            else:
-                self.setPalette(QPalette(QColor("#990000")))  # redish
-                self.main_layout_widget.setStyleSheet(self.changed_css1.toString())  # redish
-            
-            self.theme_counter += 1    
-            
-        else:
-            # set the background color back to ''
-            self.setPalette(QPalette(QColor("#498f7f")))
-            self.main_layout_widget.setStyleSheet(self.main_css.toString())
-    """ @nhancements """
-            
     # Dialog window method
     """ part of the enhancements """
     def feature_dialog(self, condition=None, character=None):
         self.dialog_window = QDialog()  # Create dialog window
         self.dialog_window.setModal(True) 
-        #self.dialog_window.setGeometry(200,200,200, 200)  # setting window geometries
+        self.dialog_window.setGeometry(200,200,200, 200)  # setting window geometries
         self.dialog_window.setWindowTitle("Feed")  # Set window title 
         self.dialog_window.setPalette(QPalette(QColor("#b3ffe6")))
         
@@ -323,16 +345,19 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         
         # check for conditions
         if condition == "You Win!":
+            
             self.pixmap_label.setPixmap(self.win_pixmap)
             self.win_label.setText("WINNER - " + character + "!")
+            
+            self.board_message.replaceWidget(self.player_grid_widget, self.main_vbox_widget)
 
         elif condition == "Its a Draw!":
             self.pixmap_label.setPixmap(self.draw_pixmap)
-            self.win_label.setText("DRAW!")
+            self.win_label.setText("Its a Draw")
             
         elif condition == "You lose!":
             self.pixmap_label.setPixmap(self.lose_pixmap)
-            self.win_label.setText("LOSSER - " + character + "!")
+            self.win_label.setText("You lose!")
             
         self.dialog_window.setLayout(self.main_vbox)
         self.dialog_window.show()
@@ -343,6 +368,9 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         
         # check for messages from the server (new game,X or new game,O)
         if txt == "new game,X" or txt == "new game,O":
+            
+            
+            self.board_message.replaceWidget(self.main_vbox_widget,self.board_game_widget)
             
             # declare a new game
             self.reset_board()
@@ -397,32 +425,41 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             self.server_messages.append("game over")  # append message to text edit
             
             # check who won the game and display appropriate information (Dialog window)
-            if self.shape == txt[-1]:
+            if self.shape == txt[-1] and self.shape == "X":
                 self.condition = "You Win!"
                 
                 # show dialog window and play sound
                 self.sounds["win"].play()
+                self.feature_dialog(condition=self.condition, character="X")
                 
                 self.server_messages.append(self.condition) # append message to text edit
                 
-                self.feature_dialog(condition=self.condition, character=self.shape)  # show dialog window
+            elif self.shape == txt[-1] and self.shape == "O":
+                self.condition = "You Win!"
                 
-                # Update new score for the current winner
-                self.new_score = int(self.score_you.text()) + 1
-                self.score_you.setText(str(self.new_score))  # set new score
+                self.sounds["win"].play()
+                self.feature_dialog(condition=self.condition, character="O")  # display dialog window
+                
+                self.server_messages.append(self.condition) # append message to text edit
 
             else:    
                 self.condition = "You lose!"
                 
-                # show dialog window and play sound
                 self.server_messages.append(self.condition) # append message to text edit
                 
-                self.feature_dialog(condition=self.condition, character=self.shape)  # show dialog window
-                
-                # Update new score for the current loser
-                self.new_score = int(self.score_opponent.text()) + 1
-                self.score_opponent.setText(str(self.new_score))  # set new score
+                self.feature_dialog(condition=self.condition, character="")  # display dialog window
             
+            # Update new score
+            if txt == "game over,X":
+                self.old_score = self.score_x.text()  # get the current score
+                self.new_score = int(self.old_score) + 1 
+                self.score_x.setText(str(self.new_score))  # set new score
+                
+            elif txt == "game over,O":    
+                self.old_score = self.score_o.text()  # get the current score
+                self.new_score = int(self.old_score) + 1 
+                self.score_o.setText(str(self.new_score))  # set new score   
+
         elif txt == "game over,T":
             self.condition = "Its a Draw!"
             self.server_messages.append("game over\nits a Draw!") # append message to text edit
@@ -438,8 +475,9 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             else:
                 self.server_messages.append("Opponent left the game!") # append message to text edit
                 
-            self.end_game() # decalre new game
+            self.exit_game() # decalre new game
                 
+    
     # reset board method
     def reset_board(self):
         # Enable game board and clear each button
@@ -450,10 +488,9 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             button.setIcon(self.bIcon)
             button.setEnabled(True)
             
-        self.my_shape.setIcon(self.bIcon)
-    
     # new game method
-    def end_game(self):
+    def exit_game(self):
+        
         self.reset_board() # reset the board
         
         self.feedback.setText("Disconnected")  # give user feedback
@@ -462,10 +499,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         
         self.board_game_widget.setEnabled(False) # disable the board game
         
-        # reset the score board
-        self.score_you.setText("0")
-        self.score_opponent.setText("0")
-        
     # connect to the server method
     def connect_server(self):
         self.localhost = self.server_lineEdit.displayText().lower()  # get text from the Line Edit
@@ -473,7 +506,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         # check if input is valid
         if self.localhost in ["127.0.0.1","localhost"]:
             game.connect_to_server(self.localhost)  # connect to the server
-            self.server_messages.insertPlainText("->Connected to the server!")  # give feedback to which server a player is connected to
+            self.feedback.setText("connected to " + self.localhost)  # give feedback to which server a player is connected to
             
             self.loop_thread.start()  # start the loop thread
             
@@ -510,6 +543,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
     def exit(self): 
         sys.exit()
         
+
 app = QApplication(sys.argv)  # creates necessary app object
 game = OXO_GAME()  # Instance of OXO_GUI class
 
