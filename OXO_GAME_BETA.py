@@ -257,7 +257,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             # set the background color back to ''
             self.setPalette(QPalette(QColor("#498f7f")))
             self.main_layout_widget.setStyleSheet(self.main_css.toString())
-    """ @nhancements """
+    """ @enhancements """
             
     # Dialog window method
     """ part of the enhancements """
