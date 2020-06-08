@@ -345,14 +345,14 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             
             # check for character,set Icon and play sound
             if self.shape_move == "X":
-                self.sounds["cross"].play()  # play sound
+                self.sounds["cross"].play()  
                 
-                self.clicked_button.setIcon(self.xIcon)  # set Icon
+                self.clicked_button.setIcon(self.xIcon)  
                 
             elif self.shape_move == "O":
-                self.sounds["nought"].play()  # play sound
+                self.sounds["nought"].play()  
                 
-                self.clicked_button.setIcon(self.oIcon)  # set Icon
+                self.clicked_button.setIcon(self.oIcon)  
             
         elif txt[:12] == "invalid move":
             self.server_messages.append("invalid move")  # append message to text edit
@@ -435,7 +435,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         
         self.board_game_widget.setEnabled(False) # disable the board game
         
-                    
     # connect to the server method
     def connect_server(self):
         self.localhost = self.server_lineEdit.displayText().lower()  # get text from the Line Edit
