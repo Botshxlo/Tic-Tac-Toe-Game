@@ -261,81 +261,26 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             
     # Dialog window method
     """ part of the enhancements """
-    def feature_dialog(self, condition=None, character=None):
-        self.dialog_window = QDialog()  # Create dialog window
-        self.dialog_window.setModal(True) 
-        #self.dialog_window.setGeometry(200,200,200, 200)  # setting window geometries
-        self.dialog_window.setWindowTitle("Feed")  # Set window title 
-        self.dialog_window.setPalette(QPalette(QColor("#b3ffe6")))
-        
-        # vbox for the pixmap winner and play again label
-        self.v_box = QVBoxLayout()
-        
-        # hbox for the buttons
-        self.h_box = QHBoxLayout()
-        
-        # main vbox for the overall layout
-        self.main_vbox = QVBoxLayout()
+    def feature_Message(self, condition=None, character=None):
 
-        # create pixmap label
-        self.pixmap_label = QLabel("")
-        
-        # create widgets
-        self.win_label = QLabel("")
-        self.win_label.setFont(QFont("Arial",18,5))
-        self.win_label.setAlignment(Qt.AlignCenter)
-        
-        self.play_label = QLabel("Play again?") 
-        self.play_label.setFont(QFont("Arial",12,5))
-        self.play_label.setAlignment(Qt.AlignCenter)
-        
-        # create buttons
-        self.yes_button = QPushButton("Yes")
-        self.yes_button.setObjectName("y")
-        self.no_button = QPushButton("No")
-        self.no_button.setObjectName("n")
-        
-        # connect signals to slots
-        for button in [self.yes_button, self.no_button]:
-            button.clicked.connect(self.response)
-        
-        # set the mixmap labels
-        self.win_pixmap = QPixmap(os.path.join("Icons", "winIcon.png"))
-        self.lose_pixmap = QPixmap(os.path.join("Icons", "loseIcon.png"))
-        self.draw_pixmap = QPixmap(os.path.join("Icons", "drawIcon.png"))
-        
-        self.v_box.addWidget(self.pixmap_label, alignment=Qt.AlignCenter)
-        self.v_box.addWidget(self.win_label)
-        """ set vbox QWidget """
-        self.vbox_widget = QWidget()
-        self.vbox_widget.setLayout(self.v_box)
-            
-        self.h_box.addWidget(self.yes_button)
-        self.h_box.addWidget(self.no_button)
-        """ set hbox Widget """
-        self.h_box_widget = QWidget()
-        self.h_box_widget.setLayout(self.h_box)
-            
-        # set all widgets
-        self.main_vbox.addWidget(self.vbox_widget)
-        self.main_vbox.addWidget(self.play_label)
-        self.main_vbox.addWidget(self.h_box_widget)
-        
         # check for conditions
         if condition == "You Win!":
-            self.pixmap_label.setPixmap(self.win_pixmap)
-            self.win_label.setText("WINNER - " + character + "!")
+            self.feed = "YOU WIN - " + character + "!\nPlay again?"
 
         elif condition == "Its a Draw!":
-            self.pixmap_label.setPixmap(self.draw_pixmap)
-            self.win_label.setText("DRAW!")
+            self.feed = "ITS A DRAW!\nPlay again?"         
             
         elif condition == "You lose!":
-            self.pixmap_label.setPixmap(self.lose_pixmap)
-            self.win_label.setText("LOSSER - " + character + "!")
+            self.feed = "YOU LOSE - " + character + "!\nPlay again?"
             
-        self.dialog_window.setLayout(self.main_vbox)
-        self.dialog_window.show()
+        self.user_feedback = QMessageBox.question(self,"Game Over", self.feed, QMessageBox.Yes|QMessageBox.No)    
+            
+        if self.user_feedback == QMessageBox.Yes:
+            self.res_answer = "y"
+        else:
+            self.res_answer = "n"        
+
+        game.send_message(self.res_answer) # send messages to the server
     """ @enhancements """    
     
     # loop thread method    
@@ -403,37 +348,39 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
                 # show dialog window and play sound
                 self.sounds["win"].play()
                 
-                self.server_messages.append(self.condition) # append message to text edit
-                
-                self.feature_dialog(condition=self.condition, character=self.shape)  # show dialog window
-                
                 # Update new score for the current winner
                 self.new_score = int(self.score_you.text()) + 1
                 self.score_you.setText(str(self.new_score))  # set new score
+                
+                self.server_messages.append(self.condition) # append message to text edit
+                
+                self.feature_Message(condition=self.condition, character=self.shape)  # show dialog window
 
             else:    
                 self.condition = "You lose!"
                 
-                # show dialog window and play sound
-                self.server_messages.append(self.condition) # append message to text edit
-                
-                self.feature_dialog(condition=self.condition, character=self.shape)  # show dialog window
+                self.sounds["lose"].play()
                 
                 # Update new score for the current loser
                 self.new_score = int(self.score_opponent.text()) + 1
                 self.score_opponent.setText(str(self.new_score))  # set new score
+                
+                # show dialog window and play sound
+                self.server_messages.append(self.condition) # append message to text edit
+                
+                self.feature_Message(condition=self.condition, character=self.shape)  # show dialog window
             
         elif txt == "game over,T":
             self.condition = "Its a Draw!"
             self.server_messages.append("game over\nits a Draw!") # append message to text edit
             
-            self.feature_dialog(condition=self.condition, character="T") # display dialog window
+            self.feature_Message(condition=self.condition, character="T") # display dialog window
         
         # check for messages from the server (game over)    
         if txt == "exit game":
             
             # check who ended the game
-            if self.response_user == "n":
+            if self.res_answer == "n":
                 self.server_messages.append("You left the game!") # append message to text edit
             else:
                 self.server_messages.append("Opponent left the game!") # append message to text edit
@@ -491,21 +438,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.button_number = self.sended.objectName() # get the object name
         game.send_message(str(self.button_number))  # send message to the server
     
-    # response method        
-    def response(self):
-        
-        self.res = self.sender() # retreives the clicked button
-        self.res_answer = self.res.objectName() 
-        
-        if self.res_answer == "n":
-            self.response_user = "n"
-        else:
-            self.response_user = "y"
-                
-        game.send_message(self.res_answer) # send messages to the server
-            
-        self.dialog_window.close()
-            
     # exit method        
     def exit(self): 
         sys.exit()
@@ -519,3 +451,4 @@ def run_app():
 
 if __name__ == "__main__":
     run_app()  # run the main app
+ 
