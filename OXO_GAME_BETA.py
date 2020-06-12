@@ -2,14 +2,14 @@
 # OXO Game GUI
 # 17/05/2020
 
-import os
-import sys
+import os, sys, math
 from time import *
 
 from PyQt5.QtCore import *  # imports pyqt modules
 from PyQt5.QtGui import *  # imports pyqt modules
 from PyQt5.QtMultimedia import *
 from PyQt5.QtWidgets import *  # imports pyqt modules
+from pyqtspinner.spinner import *
 
 from GameClient import *
 from sound import *
@@ -34,7 +34,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
     def __init__(self, parent=None):  # parent defines parent widget
         QWidget.__init__(self, parent)  # Super class instuctor
         GameClient.__init__(self)  # super class instructor
-
+        
         self.setWindowTitle("O X O Client")  # Set window title
         self.setGeometry(390, 90, 610, 500)  # setting window geometries
         self.setPalette(QPalette(QColor("#498f7f")))
@@ -244,8 +244,8 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         self.loop_thread.msg_signal.connect(
             self.loop_thread_slot)  # connect signal to slot
         self.connect_btn.clicked.connect(self.connect_server)
+        
     """ part of enhancements """
-
     def change_theme(self):
 
         # if button is checked
@@ -446,24 +446,24 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
     # connect to the server method
     def connect_server(self):
         # get text from the Line Edit
-        self.localhost = self.server_lineEdit.displayText().lower()
+        self.server_ul = self.server_lineEdit.displayText().lower()
 
         # check if input is valid
-        if self.localhost in ["127.0.0.1", "localhost"]:
-            game.connect_to_server(self.localhost)  # connect to the server
+        try: 
+            game.connect_to_server(self.server_ul)  # connect to the server
             # give feedback to which server a player is connected to
             self.server_messages.insertPlainText("->Connected to the server!")
-
-            self.loop_thread.start()  # start the loop thread
-
             # Disable the connect button for one user connection
             self.connect_btn.setEnabled(False)
             # Disable the line edit for one user connection
             self.server_lineEdit.setEnabled(False)
-        else:
+            
+        except:
             self.server_messages.append("->Error connecting to server!")
-
-        self.server_lineEdit.clear()  # clear the line edit
+            
+        else:
+            self.loop_thread.start()  # start the loop thread
+            self.server_lineEdit.clear()  # clear the line edit
 
     # button clicked method
     def button_clicked(self):
