@@ -9,11 +9,10 @@ from PyQt5.QtCore import *  # imports pyqt modules
 from PyQt5.QtGui import *  # imports pyqt modules
 from PyQt5.QtMultimedia import *
 from PyQt5.QtWidgets import *  # imports pyqt modules
-from pyqtspinner.spinner import *
 
 from GameClient import *
-from sound import *
-from style import *
+from sounds.sound import *
+from css.style import *
 
 class LoopThread(QThread):
 
@@ -46,6 +45,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
 
         # answer of the user
         self.response_user = None
+        self.play_counter = 0
 
         # set window icon and color
         icon = QIcon()
@@ -272,7 +272,6 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
 
     # Dialog window method
     """ part of the enhancements """
-
     def feature_Message(self, condition=None, character=None):
 
         # check for conditions
@@ -314,8 +313,11 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
                 self.my_shape.setIcon(self.xIcon)   # set Icon
             elif self.shape == "O":
                 self.my_shape.setIcon(self.oIcon)   # set Icon
-
-            self.sounds["welcome"].play()  # play sound
+            
+            if self.play_counter != 0:    
+                self.sounds["welcome"].play()  # play sound
+                
+            self.play_counter += 1    
 
         # chech for messages from the server (your or opponents move)
         if txt == "your move":
@@ -382,7 +384,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
 
                 self.sounds["lose"].play()
 
-                # Update new score for the current loser
+                # Update new score for the current winner
                 self.new_score = int(self.score_opponent.text()) + 1
                 self.score_opponent.setText(
                     str(self.new_score))  # set new score
@@ -452,6 +454,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
         try: 
             game.connect_to_server(self.server_ul)  # connect to the server
             # give feedback to which server a player is connected to
+            self.sounds["connected"].play()
             self.server_messages.insertPlainText("->Connected to the server!")
             # Disable the connect button for one user connection
             self.connect_btn.setEnabled(False)
@@ -459,6 +462,7 @@ class OXO_GAME(QWidget, GameClient):  # Stock inherits from the Qwidget
             self.server_lineEdit.setEnabled(False)
             
         except:
+            self.sounds["error"].play()
             self.server_messages.append("->Error connecting to server!")
             
         else:
