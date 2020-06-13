@@ -18,7 +18,7 @@ You should end up with 3 windows looking like this (1 for the game server `🖥`
 ![ClientWindow](ScreenShots/O.png)
 
 # 
-`You can also check the log files to see what interactions have taken place. On the game server machine open up OXOGameServer.log file, and for the clients open up the OXOGameClient.log files.`
+* You can also check the log files to see what interactions have taken place. On the game server machine open up OXOGameServer.log file, and for the clients open up the OXOGameClient.log files.
 
 
 
