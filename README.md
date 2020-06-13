@@ -1,6 +1,6 @@
 # PyQt5 Tic-Tac-Toe Game (BETA) Version! 
 
-* Run `** pip install -r requirements.txt **` to install the python modules
+* Run **`pip install -r requirements.txt`** to install the python modules
 * Double-click the OXOGameServer.py file. This should start up the server window. 🚀 
 * Start a game client by double-clicking the OXO_GAME_BETA.py file. This should start up a game client window. 🚀 
 * Start another game client by double-clicking the OXO_GAME_BETA.py file. This should start up another game client window. 🚀 
