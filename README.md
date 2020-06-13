@@ -9,7 +9,7 @@ You should end up with 3 windows looking like this (1 for the game server `🖥`
 
 
 # 
-![GameSever](/ScreenShots/game_server.png)
+`![GameSever](/ScreenShots/game_server.png)`
 
 # 
 ![ClientWindow](ScreenShots/X.png)
