@@ -7,10 +7,14 @@
 
 You should end up with 3 windows looking like this (1 for the game server 🖥, and 2 for the game clients 🖥️)
 
-`![GameSever](/ScreenShots/game_server.png)`
 
+# 
+![GameSever](/ScreenShots/game_server.png)
+
+# 
 ![ClientWindow](ScreenShots/X.png)
 
+# 
 ![ClientWindow](ScreenShots/O.png)
 
 
