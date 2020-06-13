@@ -7,7 +7,7 @@ class OXOGameServer(GameServer):
     
     def __init__(self):
         GameServer.__init__(self)
-
+#
     def is_move_valid(self,i):
         return i.strip().isdigit() and 0 <= int(i) < BOARD_SIZE and self.board[int(i)] == ' '
     

@@ -5,8 +5,6 @@ from datetime import *
 from socket import *
 from GameIni import *
 
-# Basic networking and output(screen and logfile) functionality
-
 class GameServer:
     
     def __init__(self):

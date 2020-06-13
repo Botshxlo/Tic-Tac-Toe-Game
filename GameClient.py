@@ -4,9 +4,6 @@ from datetime import *
 from socket import *
 from GameIni import *
 
-# Basic networking and log(logfile) functionalitycd
-""" /c/users/botshelo/downloads/comsci/CSC1011H\ 2020/Tutorial_5/Tic-Tac-Toe/
-"""
 class GameClient:
     
     def __init__(self):                
