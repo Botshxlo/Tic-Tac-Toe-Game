@@ -5,7 +5,6 @@
 import os
 from PyQt5.QtMultimedia import *
 
-
 def feature_sound():
     # set the sounds 
     """ part of the enhancement """
@@ -20,3 +19,4 @@ def feature_sound():
     )
     
     return sounds
+    ''' @enhancements '''
